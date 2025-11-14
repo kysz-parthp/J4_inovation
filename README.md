@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# J4.Innovate - Next.js Frontend
 
-## Getting Started
+This is the Next.js frontend for J4.Innovate, integrated with a Spring Boot backend.
 
-First, run the development server:
+## 🚀 Quick Start
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Prerequisites
+
+- Node.js 18+ installed
+- Spring Boot backend running on `http://localhost:8080`
+
+### Setup
+
+1. **Create Environment File**
+
+   Create a `.env.local` file in the project root:
+
+   ```env
+   # Backend API Configuration
+   NEXT_PUBLIC_API_URL=http://localhost:8080
+   NEXT_PUBLIC_API_BASE_URL=http://localhost:8080/api
+   ```
+
+2. **Install Dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Start Development Server**
+
+   ```bash
+   npm run dev
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 📚 Documentation
+
+- **[SETUP.md](./SETUP.md)** - Detailed setup and integration guide
+- **[JAVA_BACKEND_PROMPT.md](./JAVA_BACKEND_PROMPT.md)** - Backend API documentation
+- Frontend integration is complete with full API connectivity
+
+## ✅ Features
+
+- ✅ **Contact Form** - Integrated with backend API
+- ✅ **Services** - Fetches from API with fallback
+- ✅ **Portfolio** - Fetches from API with fallback
+- ✅ **Testimonials** - Fetches from API with fallback
+- ✅ **Statistics** - Fetches from API with fallback
+- ✅ **FAQ** - Fetches from API with fallback
+- ✅ **Error Handling** - Comprehensive error handling
+- ✅ **Loading States** - Loading indicators for all components
+- ✅ **TypeScript** - Full type safety
+
+## 🏗️ Project Structure
+
+```
+src/
+├── types/
+│   └── api.ts              # TypeScript type definitions
+├── lib/
+│   ├── api.ts              # API client service
+│   └── iconMapping.ts      # Icon mapping utility
+├── hooks/
+│   └── useApi.ts           # Custom React hook
+└── components/
+    ├── Contact.tsx         # Contact form
+    ├── Services.tsx        # Services section
+    ├── Portfolio.tsx       # Portfolio section
+    ├── Testimonials.tsx    # Testimonials section
+    ├── Statistics.tsx      # Statistics section
+    └── FAQ.tsx             # FAQ section
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🔌 API Integration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+All components are integrated with the Spring Boot backend:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Contact Form**: POST `/api/contact`
+- **Services**: GET `/api/services`
+- **Portfolio**: GET `/api/portfolio`
+- **Testimonials**: GET `/api/testimonials`
+- **Statistics**: GET `/api/statistics`
+- **FAQ**: GET `/api/faq`
 
-## Learn More
+## 🛠️ Available Scripts
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run dev      # Start development server
+npm run build    # Build for production
+npm start        # Start production server
+npm run lint     # Run ESLint
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📝 Learn More
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- [Next.js Documentation](https://nextjs.org/docs)
+- [React Documentation](https://react.dev)
+- [TypeScript Documentation](https://www.typescriptlang.org/docs)
 
-## Deploy on Vercel
+## 🚀 Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Important**: Update environment variables in Vercel dashboard for production API URLs.

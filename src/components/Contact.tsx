@@ -1,21 +1,80 @@
 "use client";
 
 import { Mail, Phone, MapPin, Send, Instagram, Linkedin, Github } from "lucide-react";
-import { useState } from "react";
+import { useState, FormEvent } from "react";
+import { contactApi } from "@/lib/api";
+import { ContactRequest } from "@/types/api";
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ContactRequest>({
     name: "",
     email: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{
+    type: "success" | "error" | null;
+    message: string;
+  }>({ type: null, message: "" });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log("Form submitted:", formData);
-    alert("Thank you for your message! We'll get back to you soon.");
-    setFormData({ name: "", email: "", message: "" });
+    setIsSubmitting(true);
+    setSubmitStatus({ type: null, message: "" });
+
+    try {
+      const response = await contactApi.submit(formData);
+      
+      if (response.success) {
+        setSubmitStatus({
+          type: "success",
+          message: response.message || "Thank you for your message! We'll get back to you soon.",
+        });
+        setFormData({ name: "", email: "", message: "" });
+        // Clear success message after 5 seconds
+        setTimeout(() => {
+          setSubmitStatus({ type: null, message: "" });
+        }, 5000);
+      } else {
+        setSubmitStatus({
+          type: "error",
+          message: response.message || "Failed to send message. Please try again.",
+        });
+      }
+    } catch (error) {
+      let errorMessage = "Failed to send message. Please try again later.";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        
+        // Handle rate limit specifically
+        if (error.message.includes("Too many requests")) {
+          errorMessage = "You have submitted too many requests. Please wait an hour before trying again.";
+        }
+      }
+      
+      setSubmitStatus({
+        type: "error",
+        message: errorMessage,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    
+    // Clear error when user starts typing
+    if (submitStatus.type === "error") {
+      setSubmitStatus({ type: null, message: "" });
+    }
   };
 
   return (
@@ -130,12 +189,14 @@ export default function Contact() {
                 <input
                   type="text"
                   id="name"
+                  name="name"
                   required
+                  minLength={2}
+                  maxLength={255}
                   value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  onChange={handleChange}
+                  disabled={isSubmitting}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="John Doe"
                 />
               </div>
@@ -150,12 +211,12 @@ export default function Contact() {
                 <input
                   type="email"
                   id="email"
+                  name="email"
                   required
                   value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  onChange={handleChange}
+                  disabled={isSubmitting}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="john@example.com"
                 />
               </div>
@@ -169,23 +230,60 @@ export default function Contact() {
                 </label>
                 <textarea
                   id="message"
+                  name="message"
                   required
+                  minLength={10}
                   rows={5}
                   value={formData.message}
-                  onChange={(e) =>
-                    setFormData({ ...formData, message: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                  onChange={handleChange}
+                  disabled={isSubmitting}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Tell us about your project..."
                 />
+                <p className="mt-1 text-sm text-gray-500">
+                  {formData.message.length}/10 minimum characters
+                </p>
               </div>
+
+              {submitStatus.type && (
+                <div
+                  className={`p-4 rounded-lg ${
+                    submitStatus.type === "success"
+                      ? "bg-green-50 text-green-800 border border-green-200"
+                      : "bg-red-50 text-red-800 border border-red-200"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    {submitStatus.type === "success" ? (
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                    <p>{submitStatus.message}</p>
+                  </div>
+                </div>
+              )}
 
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Send size={20} />
-                Send Message
+                {isSubmitting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send size={20} />
+                    Send Message
+                  </>
+                )}
               </button>
             </form>
           </div>
